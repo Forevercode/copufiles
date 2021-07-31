@@ -3,7 +3,8 @@ import sys
 from workset.baseclass import BaseGet
 from workset.writeclass import WriteMethod
 from workset.holdingpath import NewDir, NewFile
-from workset.value import Keyword
+from workset.value import Keyword,Filetype
+from workset.error import Nofile_working
 
 from workset.usefultool import Tool1, DirectoryWalk
 
@@ -31,18 +32,19 @@ class Working:
             raise ValueError(f"Paramater:{file_system_path} can be string only")
         self._file_system_path = file_system_path
 
-    def copy_all_scripts(self, directory):
+    def copy_all_scripts(self, directory,filetype="txt",binaryfiletype="png"):
 
         result = DirectoryWalk.walk_directory(directory)
-        for each_path in result:
-            self.copy_scripts(each_path)
+        for each_fir in result:
+            self.copy_scripts(each_fir,filetype=filetype,binaryfiletype=binaryfiletype)
 
-    def copy_scripts_in_py(self, py_dir, keyword=Keyword.pycharm):
+
+    def copy_scripts(self, py_dir, keyword=Keyword.pycharm,filetype="txt",binaryfiletype="png"):
         try:
-            # get the python files
+            # get the python files under (py_dir)
             files = BaseGet._get_files(py_dir)
             if files == None:
-                raise Exception
+                raise Nofile_working
 
             # create new dir in file_system_path
             path_sample = files[0][0]
@@ -58,7 +60,7 @@ class Working:
                 # use try to hlod binary file
                 try:
                     # make new file path
-                    new_script = NewFile.newfile_py(dir=new_dir, filename=file[1])
+                    new_script = NewFile.newfile(dir=new_dir, filename=file[1],filetype=filetype)
                     # write
                     WriteMethod._write_script(copied=file[0], copy_to=new_script)
                     print(f"以複製:\n{file[0]}")
@@ -66,50 +68,14 @@ class Working:
 
                 except UnicodeDecodeError:
                     os.remove(new_script)
-                    new_script = NewFile.newfile_png(dir=new_dir, filename=file[1])
+                    new_script = NewFile.newfile(dir=new_dir, filename=file[1],filetype=binaryfiletype)
 
                     WriteMethod._write_binary(copied=file[0], copy_to=new_script)
                     print(f"以複製<binary file>:\n{file[0]}")
-        except Exception:
-            print(f"No file under directory {py_dir}.Error happen at{os.getcwd()}{__name__}")
+        except Nofile_working:
+            print(f"No file under directory: {py_dir}.__working")
 
-    def copy_scripts(self, py_dir, keyword=Keyword.pycharm):
-        try:
-            # get the python files
-            files = BaseGet._get_files(py_dir)
-            #      if files == None:
-            #         raise Exception
-
-            # create new dir in file_system_path
-            path_sample = files[0][0]
-
-            new_dir = NewDir._with_original_path(path_sample=path_sample, file_system_path=self.file_system_path,
-                                                 keyword=keyword)
-
-            if os.path.exists(new_dir) == False:
-                os.makedirs(new_dir)
-
-            # loop throught all file and copy all
-            for file in files:
-                # use try to hlod binary file
-                try:
-                    # make new file path
-                    new_script = NewFile.newfile_txt(dir=new_dir, filename=file[1])
-                    # write
-                    WriteMethod._write_script(copied=file[0], copy_to=new_script)
-                    print(f"以複製:\n{file[0]}")
-
-
-                except UnicodeDecodeError:
-                    os.remove(new_script)
-                    new_script = NewFile.newfile_png(dir=new_dir, filename=file[1])
-
-                    WriteMethod._write_binary(copied=file[0], copy_to=new_script)
-                    print(f"以複製<binary file>:\n{file[0]}")
-        except Exception:
-            print(f"No file under directory {py_dir}.Error happen at{os.getcwd()}{__name__}")
-
-    def copy_script(self, py_path, keyword=Keyword.pycharm):
+    def copy_script(self, py_path, keyword=Keyword.pycharm,filetype="txt",binaryfiletype="png"):
 
         try:
 
@@ -125,7 +91,7 @@ class Working:
             try:
                 # make new file path
                 filename = py_path.split("\\")[len(py_path.split("\\"))]
-                new_script = NewFile.newfile_py(dir=new_dir, filename=filename)
+                new_script = NewFile.newfile(dir=new_dir, filename=filename,filetype=filetype)
                 # write
                 WriteMethod._write_script(copied=py_path, copy_to=new_script)
 
@@ -133,69 +99,48 @@ class Working:
             except UnicodeDecodeError:
                 os.remove(new_script)
 
-                new_script = NewFile.newfile_png(dir=new_dir, filename=filename)
+                new_script = NewFile.newfile_png(dir=new_dir, filename=filename,filetype=binaryfiletype)
                 WriteMethod._write_binary(copied=py_path, copy_to=new_script)
-                print(f"以複製:\n{py_path}")
                 print(f"以複製<binary file>:\n{py_path}")
 
         except Exception:
-            print(f"\n<<No such  path:{py_path}>>\n")
-
-    def simply_copy_all_script_in_py(self, directory):
-        result = DirectoryWalk.walk_directory(directory)
-        for each_directory in result:
-            self.simply_copy_scripts_in_py()
-
-    def simply_copy_all_script(self, directory):
-        result = DirectoryWalk.walk_directory(directory)
-        for each_directory in result:
-            self.simply_copy_scripts()
+            print(f"\n<<No such  path:{py_path}>>__working\n")
 
 
 
-    def simply_copy_scripts_in_py(self, py_dir):
+
+
+
+
+    def simply_copy_scripts(self, py_dir,filetype="txt",binaryfiletype="png"):
         try:
             files = BaseGet._get_files(root=py_dir)
             if files == None:
-                raise Exception
-
-            for file in files:
-                new_script = NewFile.newfile_py(dir=self.file_system_path, filename=file[1])
-                WriteMethod._write_script(copied=file[0], copy_to=new_script)
-
-                print(f"以複製:\n{file[0]}")
-        except Exception:
-            print(f"No file under directory {py_dir}.Error happen at{os.getcwd()}\\{__name__}")
-
-
-    def simply_copy_scripts(self, py_dir):
-        try:
-            files = BaseGet._get_files(root=py_dir)
-            if files == None:
-                raise Exception
+                raise Nofile_working
 
             for file in files:
                 try:
-                    new_script = NewFile.newfile_txt(dir=self.file_system_path, filename=file[1])
+                    new_script = NewFile.newfile(dir=self.file_system_path, filename=file[1],filetype=filetype)
                     WriteMethod._write_script(copied=file[0], copy_to=new_script)
 
                     print(f"以複製:\n{file[0]}")
 
                 except UnicodeDecodeError:
                     os.remove(new_script)
-                    new_script = NewFile.newfile_png(dir=self.file_system_path, filename=file[1])
+                    new_script = NewFile.newfile(dir=self.file_system_path, filename=file[1],filetype=binaryfiletype)
                     WriteMethod._write_binary(copied=file[0], copy_to=new_script)
 
                     print(f"以複製<<binary file>>:\n{file[0]}")
-        except Exception:
-            print(f"No file under directory {py_dir}.Error happen at{os.getcwd()}\\{__name__}")
+        except Nofile_working:
+            print(f"No file under directory {py_dir}.__working\n")
 
-    def simply_copy_script(self, py_path):
+
+    def simply_copy_script(self, py_path,filetype="txt",binaryfiletype="png"):
         # use  try to hold binary file
         try:
             # make new file path
             filename = py_path.split("\\")[len(py_path.split("\\"))]
-            new_script = NewFile.newfile_py(dir=py_path, filename=filename)
+            new_script = NewFile.newfile(dir=py_path, filename=filename,filetype=filetype)
             # write
             WriteMethod._write_script(copied=py_path, copy_to=new_script)
 
@@ -204,7 +149,7 @@ class Working:
         except UnicodeDecodeError:
             os.remove(new_script)
 
-            new_script = NewFile.newfile_png(dir=py_path, filename=filename)
+            new_script = NewFile.newfile(dir=py_path, filename=filename,filetype=binaryfiletype)
             WriteMethod._write_binary(copied=py_path, copy_to=new_script)
 
             print(f"以複製<binary file>:\n{py_path}")

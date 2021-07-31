@@ -66,8 +66,10 @@ class DirectoryWalk(Tool1):
                                                                 if t8 != None:
                                                                     for i in t8:
                                                                         all_dir_path.append(i)
-            print(all_dir_path)
-            return all_dir_path
+                                                                        t9=Tool1.dirs(i)
+                                                                        if t9!=None:
+                                                                             for i in t9:
+                                                                                 all_dir_path.append(i)
 
 
 if __name__ == "__main__":

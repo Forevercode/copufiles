@@ -1,2 +1,0 @@
-class FiletypeError(Exception):
-    pass
