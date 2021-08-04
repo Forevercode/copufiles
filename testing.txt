@@ -1,6 +1,0 @@
-from working import Working
-
-job=Working(r"C:\Users\pands\OneDrive\桌面\file_managent")
-job.simply_copy_scripts(r"C:\Users\pands\PycharmProjects\work",filetype="txt")
-more_dir=job.dirs(r"C:\Users\pands\PycharmProjects\work")
-print(more_dir)
